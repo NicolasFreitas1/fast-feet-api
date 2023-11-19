@@ -6,6 +6,8 @@ export interface RecipientProps {
   address: string
   phone: number
   cpf: string
+  latitude: number
+  longitude: number
 }
 
 export class Recipient extends Entity<RecipientProps> {
@@ -35,6 +37,14 @@ export class Recipient extends Entity<RecipientProps> {
 
   get cpf() {
     return this.props.cpf
+  }
+
+  get latitude() {
+    return this.props.latitude
+  }
+
+  get longitude() {
+    return this.props.longitude
   }
 
   static create(props: RecipientProps, id?: UniqueEntityId) {
