@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: fast-feet-api-database
+    image: bitnami/postgresql
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRESQL_USERNAME=docker
+      - POSTGRESQL_PASSWORD=docker
+      - POSTGRESQL_DATABASE=fast-feet-api
+
+  cache:
+    container_name: fast-feet-api-cache
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data/redis:/data
