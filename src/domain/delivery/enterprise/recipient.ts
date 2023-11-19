@@ -4,7 +4,7 @@ import { UniqueEntityId } from 'src/core/entities/unique-entity-id'
 export interface RecipientProps {
   name: string
   address: string
-  phone: number
+  phone: string
   cpf: string
   latitude: number
   longitude: number
@@ -31,7 +31,7 @@ export class Recipient extends Entity<RecipientProps> {
     return this.props.phone
   }
 
-  set phone(phone: number) {
+  set phone(phone: string) {
     this.props.phone = phone
   }
 
