@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  DELIVERYMAN
+}
+
+enum OrderStatus {
+  WAITING
+  PiCKEDUP
+  DELIVERED
+  RETURNED
+}
+
+model User {
+  id       String  @id @default(uuid()) @map("id_user") @db.Uuid()
+  name     String  @map("nm_user") @db.VarChar(250)
+  cpf      String  @unique @map("vl_cpf") @db.VarChar(14)
+  password String  @map("vl_password") @db.VarChar(250)
+  Order    Order[]
+
+  @@map("user")
+}
+
+model Order {
+  id            String      @id @default(uuid()) @map("id_order") @db.Uuid()
+  name          String      @map("nm_order") @db.VarChar(250)
+  status        OrderStatus @default(WAITING)
+  deliverymanId String?     @map("id_deliveryman") @db.Uuid()
+  recipientId   String      @map("id_recipient") @db.Uuid()
+  createdAt     DateTime    @default(now()) @map("dt_created")
+  updatedAt     DateTime?   @updatedAt @map("dt_updated")
+  pickedUpAt    DateTime?   @map("dt_picked_up")
+  deliveredAt   DateTime?   @map("dt_delivered")
+
+  deliveryman User?     @relation(fields: [deliverymanId], references: [id])
+  recipient   Recipient @relation(fields: [recipientId], references: [id])
+
+  @@map("order")
+}
+
+model Recipient {
+  id        String  @id @default(uuid()) @map("id_recipient") @db.Uuid()
+  name      String  @map("nm_recipient") @db.VarChar(250)
+  address   String  @map("nm_address") @db.VarChar(250)
+  phone     String  @map("vl_number") @db.VarChar(10)
+  cpf       String  @unique @map("vl_cpf") @db.VarChar(14)
+  latitude  Decimal @map("vl_latitute")
+  longitude Decimal @map("vl_longitude")
+  Order     Order[]
+
+  @@map("recipient")
+}

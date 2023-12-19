@@ -13,10 +13,11 @@ export function makeRecipient(
     {
       name: faker.person.firstName(),
       address: faker.location.streetAddress(),
-      cpf: faker.finance.iban(),
+      cpf: faker.lorem.sentence(14),
       latitude: faker.location.latitude(),
       longitude: faker.location.longitude(),
       phone: faker.phone.number(),
+
       ...override,
     },
     id,
