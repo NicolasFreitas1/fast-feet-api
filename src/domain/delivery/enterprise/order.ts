@@ -1,19 +1,25 @@
-import { Entity } from 'src/core/entities/entity'
-import { UniqueEntityId } from 'src/core/entities/unique-entity-id'
-import { Optional } from 'src/core/types/optional'
+import { AggregateRoot } from '@/core/entities/aggregate-root'
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { Optional } from '@/core/types/optional'
+import { OrderCreatedEvent } from './events/order-created-event'
+import { OrderDeliveredEvent } from './events/order-delivered-event'
+import { OrderMarkedAsWaitingEvent } from './events/order-marked-as-waiting-event'
+import { OrderPickedUpEvent } from './events/order-picked-up-event'
+import { OrderReturnedEvent } from './events/order-returned-event'
 
 export interface OrderProps {
   name: string
   status: 'waiting' | 'pickedUp' | 'delivered' | 'returned'
-  deliverymanId: UniqueEntityId
+  deliverymanId?: UniqueEntityId | null
   recipientId: UniqueEntityId
+  deliveryPhotoUrl?: string | null
   createdAt: Date
   updatedAt?: Date | null
   pickedUpAt?: Date | null
   deliveredAt?: Date | null
 }
 
-export class Order extends Entity<OrderProps> {
+export class Order extends AggregateRoot<OrderProps> {
   get name() {
     return this.props.name
   }
@@ -33,21 +39,31 @@ export class Order extends Entity<OrderProps> {
     switch (status) {
       case 'pickedUp':
         this.props.pickedUpAt = new Date()
-
+        break
       case 'delivered':
         this.props.deliveredAt = new Date()
-
+        break
       default:
-        this.props.updatedAt = new Date()
+        break
     }
+    this.props.updatedAt = new Date()
   }
 
   get deliverymanId() {
-    return this.props.deliverymanId
+    return this.props.deliverymanId ?? null
   }
 
-  set deliverymanId(deliverymanId: UniqueEntityId) {
-    this.props.deliverymanId = deliverymanId
+  set deliverymanId(deliverymanId: UniqueEntityId | null | undefined) {
+    this.props.deliverymanId = deliverymanId ?? undefined
+    this.touch()
+  }
+
+  get deliveryPhotoUrl() {
+    return this.props.deliveryPhotoUrl ?? null
+  }
+
+  set deliveryPhotoUrl(value: string | null | undefined) {
+    this.props.deliveryPhotoUrl = value ?? undefined
     this.touch()
   }
 
@@ -80,8 +96,34 @@ export class Order extends Entity<OrderProps> {
     this.props.updatedAt = new Date()
   }
 
+  pickUp(deliverymanId: UniqueEntityId): void {
+    this.deliverymanId = deliverymanId
+    this.status = 'pickedUp'
+    this.addDomainEvent(new OrderPickedUpEvent(this))
+  }
+
+  deliver(deliveryPhotoUrl: string): void {
+    this.deliveryPhotoUrl = deliveryPhotoUrl
+    this.status = 'delivered'
+    this.addDomainEvent(new OrderDeliveredEvent(this))
+  }
+
+  returnOrder(): void {
+    this.status = 'returned'
+    this.addDomainEvent(new OrderReturnedEvent(this))
+  }
+
+  markAsWaiting(): void {
+    this.status = 'waiting'
+    this.deliverymanId = null
+    this.addDomainEvent(new OrderMarkedAsWaitingEvent(this))
+  }
+
   static create(
-    props: Optional<OrderProps, 'createdAt' | 'status'>,
+    props: Optional<
+      OrderProps,
+      'createdAt' | 'status' | 'deliverymanId' | 'deliveryPhotoUrl'
+    >,
     id?: UniqueEntityId,
   ) {
     const order = new Order(
@@ -89,9 +131,16 @@ export class Order extends Entity<OrderProps> {
         ...props,
         createdAt: props.createdAt ?? new Date(),
         status: props.status ?? 'waiting',
+        deliverymanId: props.deliverymanId ?? undefined,
+        deliveryPhotoUrl: props.deliveryPhotoUrl ?? undefined,
       },
       id,
     )
+
+    const isNewOrder = !id
+    if (isNewOrder) {
+      order.addDomainEvent(new OrderCreatedEvent(order))
+    }
 
     return order
   }
