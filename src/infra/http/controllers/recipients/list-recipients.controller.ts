@@ -5,10 +5,17 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { ListRecipientsUseCase } from '@/domain/delivery/application/use-cases/list-recipients'
 import { IsAdmin } from '@/infra/auth/is-admin.decorator'
 import { IsAdminGuard } from '@/infra/auth/is-admin.guard'
 import { RecipientWithPaginationPresenter } from '@/infra/http/presenters/recipient-with-pagination-presenter'
+import {
+  ApiAdminAuth,
+  ApiPaginationQuery,
+  ApiValidationErrorResponse,
+} from '@/infra/http/swagger/swagger.decorators'
+import { RecipientsResponseDto } from '@/infra/http/swagger/swagger.models'
 import {
   paginationQueryValidationPipe,
   PaginationQuerySchema,
@@ -16,11 +23,17 @@ import {
 
 @Controller('recipients')
 @UseGuards(IsAdminGuard)
+@ApiTags('Recipients')
 export class ListRecipientsController {
   constructor(private listRecipients: ListRecipientsUseCase) {}
 
   @Get()
   @IsAdmin()
+  @ApiOperation({ summary: 'List recipients' })
+  @ApiAdminAuth()
+  @ApiPaginationQuery()
+  @ApiOkResponse({ type: RecipientsResponseDto })
+  @ApiValidationErrorResponse()
   async handle(
     @Query(paginationQueryValidationPipe) query: PaginationQuerySchema,
   ) {

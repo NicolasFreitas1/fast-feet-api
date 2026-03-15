@@ -7,11 +7,26 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger'
 import { CreateRecipientUseCase } from '@/domain/delivery/application/use-cases/create-recipient'
 import { RecipientAlreadyExistsError } from '@/domain/delivery/application/use-cases/errors/recipient-already-exists-error'
 import { IsAdmin } from '@/infra/auth/is-admin.decorator'
 import { IsAdminGuard } from '@/infra/auth/is-admin.guard'
 import { RecipientPresenter } from '@/infra/http/presenters/recipient-presenter'
+import {
+  ApiAdminAuth,
+  ApiConflictErrorResponse,
+  ApiValidationErrorResponse,
+} from '@/infra/http/swagger/swagger.decorators'
+import {
+  CreateRecipientRequestDto,
+  RecipientResponseDto,
+} from '@/infra/http/swagger/swagger.models'
 import {
   createRecipientBodyValidationPipe,
   CreateRecipientBodySchema,
@@ -19,12 +34,19 @@ import {
 
 @Controller('recipients')
 @UseGuards(IsAdminGuard)
+@ApiTags('Recipients')
 export class CreateRecipientController {
   constructor(private createRecipient: CreateRecipientUseCase) {}
 
   @Post()
   @IsAdmin()
   @HttpCode(201)
+  @ApiOperation({ summary: 'Create a recipient' })
+  @ApiAdminAuth()
+  @ApiBody({ type: CreateRecipientRequestDto })
+  @ApiCreatedResponse({ type: RecipientResponseDto })
+  @ApiValidationErrorResponse()
+  @ApiConflictErrorResponse('Recipient with this CPF already exists.')
   async handle(
     @Body(createRecipientBodyValidationPipe) body: CreateRecipientBodySchema,
   ) {

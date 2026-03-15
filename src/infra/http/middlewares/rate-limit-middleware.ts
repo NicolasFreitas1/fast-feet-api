@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NestMiddleware,
-  TooManyRequestsException,
-} from '@nestjs/common'
+import { HttpException, Injectable, NestMiddleware } from '@nestjs/common'
 import { NextFunction, Request, Response } from 'express'
 import { EnvService } from '@/infra/env/env.service'
 
@@ -36,9 +32,7 @@ export class RateLimitMiddleware implements NestMiddleware {
     }
 
     if (current.count >= maxRequests) {
-      throw new TooManyRequestsException(
-        'Too many requests, please try again later',
-      )
+      throw new HttpException('Too many requests, please try again later', 429)
     }
 
     current.count += 1

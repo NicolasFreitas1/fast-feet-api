@@ -13,13 +13,22 @@ describe('List Orders', () => {
 
   it('should return paginated orders for admin', async () => {
     await inMemoryOrdersRepository.create(
-      makeOrder({ name: 'Order 1', createdAt: new Date('2026-01-01T00:00:00Z') }),
+      makeOrder({
+        name: 'Order 1',
+        createdAt: new Date('2026-01-01T00:00:00Z'),
+      }),
     )
     await inMemoryOrdersRepository.create(
-      makeOrder({ name: 'Order 2', createdAt: new Date('2026-01-02T00:00:00Z') }),
+      makeOrder({
+        name: 'Order 2',
+        createdAt: new Date('2026-01-02T00:00:00Z'),
+      }),
     )
     await inMemoryOrdersRepository.create(
-      makeOrder({ name: 'Order 3', createdAt: new Date('2026-01-03T00:00:00Z') }),
+      makeOrder({
+        name: 'Order 3',
+        createdAt: new Date('2026-01-03T00:00:00Z'),
+      }),
     )
 
     const result = await sut.execute({ page: 1, perPage: 2 })

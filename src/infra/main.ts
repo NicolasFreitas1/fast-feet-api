@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 import { EnvService } from './env/env.service'
 
@@ -22,8 +23,32 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'data/uploads'), {
     prefix: '/uploads',
   })
-  app.useStaticAssets(join(process.cwd(), 'docs/api'), {
-    prefix: '/docs',
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('FastFeet API')
+    .setDescription(
+      'REST API for authentication, recipients, deliverymen and order lifecycle operations.',
+    )
+    .setVersion('1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Paste a valid access token.',
+      },
+      'access-token',
+    )
+    .build()
+
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig)
+
+  SwaggerModule.setup('docs', app, swaggerDocument, {
+    jsonDocumentUrl: 'docs/openapi.json',
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+    },
   })
 
   await app.listen(port)

@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common'
 export class EnvService {
   constructor(private configService: ConfigService<Env, true>) {}
 
-  get<T extends keyof Env>(key: T) {
+  get<T extends keyof Env>(key: T): NonNullable<Env[T]> {
     return this.configService.get(key, { infer: true })
   }
 }

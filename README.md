@@ -7,10 +7,12 @@ The project was built to be portfolio-ready: business rules are explicit, RBAC i
 ## Stack
 
 - Node.js 20+
-- NestJS 10
-- TypeScript 5
+- NestJS 11
+- TypeScript 5.9
 - Prisma 7 with PostgreSQL
-- Vitest + Supertest
+- Vitest 4 + Supertest 7
+- Vite 8
+- Zod 4
 - Redis
 - AWS SDK S3 client for R2/S3-compatible uploads
 
@@ -62,7 +64,7 @@ The API runs at `http://localhost:3333`.
 
 ## API docs
 
-- Human-friendly docs: `http://localhost:3333/docs`
+- Swagger UI: `http://localhost:3333/docs`
 - OpenAPI contract: `http://localhost:3333/docs/openapi.json`
 - Postman collection: [docs/postman/fast-feet-api.postman_collection.json](/c:/Development/fast-feet-api/docs/postman/fast-feet-api.postman_collection.json)
 
@@ -120,5 +122,5 @@ Authorization: Bearer <deliveryman-token>
 ## Known trade-offs
 
 - Rate limiting is in-memory, which is enough for demo and small deployments but should move to Redis for horizontal scale.
-- The project serves a static OpenAPI contract instead of generating Swagger dynamically because the current workspace does not include Swagger packages.
+- The OpenAPI contract is maintained manually through Swagger decorators because the HTTP layer uses `zod` pipes instead of class-validator DTOs.
 - Local upload storage is the default for easier demos; use R2/S3-compatible storage in hosted environments.

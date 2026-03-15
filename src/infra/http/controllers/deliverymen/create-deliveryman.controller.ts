@@ -7,11 +7,26 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger'
 import { CreateDeliverymanUseCase } from '@/domain/delivery/application/use-cases/create-deliveryman'
 import { DeliverymanAlreadyExistsError } from '@/domain/delivery/application/use-cases/errors/deliveryman-already-exists-error'
 import { IsAdmin } from '@/infra/auth/is-admin.decorator'
 import { IsAdminGuard } from '@/infra/auth/is-admin.guard'
 import { DeliverymanPresenter } from '@/infra/http/presenters/deliveryman-presenter'
+import {
+  ApiAdminAuth,
+  ApiConflictErrorResponse,
+  ApiValidationErrorResponse,
+} from '@/infra/http/swagger/swagger.decorators'
+import {
+  CreateDeliverymanRequestDto,
+  DeliverymanResponseDto,
+} from '@/infra/http/swagger/swagger.models'
 import {
   CreateDeliverymanBodySchema,
   createDeliverymanBodyValidationPipe,
@@ -19,12 +34,19 @@ import {
 
 @Controller('deliverymen')
 @UseGuards(IsAdminGuard)
+@ApiTags('Deliverymen')
 export class CreateDeliverymanController {
   constructor(private createDeliveryman: CreateDeliverymanUseCase) {}
 
   @Post()
   @IsAdmin()
   @HttpCode(201)
+  @ApiOperation({ summary: 'Create a deliveryman' })
+  @ApiAdminAuth()
+  @ApiBody({ type: CreateDeliverymanRequestDto })
+  @ApiCreatedResponse({ type: DeliverymanResponseDto })
+  @ApiValidationErrorResponse()
+  @ApiConflictErrorResponse('Deliveryman with this CPF already exists.')
   async handle(
     @Body(createDeliverymanBodyValidationPipe)
     body: CreateDeliverymanBodySchema,
