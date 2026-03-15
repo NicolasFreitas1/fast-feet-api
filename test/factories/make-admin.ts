@@ -1,19 +1,16 @@
 import { faker } from '@faker-js/faker'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import {
-  Deliveryman,
-  DeliverymanProps,
-} from '@/domain/delivery/enterprise/deliveryman'
+import { Admin, AdminProps } from '@/domain/delivery/enterprise/admin'
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/infra/database/prisma/prisma.service'
 import { PrismaUserMapper } from '@/infra/database/prisma/mappers/prisma-user-mapper'
 import { uniqueCpf } from 'test/utils/unique-cpf'
 
-export function makeDeliveryman(
-  override: Partial<DeliverymanProps> = {},
+export function makeAdmin(
+  override: Partial<AdminProps> = {},
   id?: UniqueEntityId,
 ) {
-  const deliveryman = Deliveryman.create(
+  return Admin.create(
     {
       name: faker.person.firstName(),
       cpf: faker.string.numeric(11),
@@ -22,30 +19,26 @@ export function makeDeliveryman(
     },
     id,
   )
-
-  return deliveryman
 }
 
 @Injectable()
-export class DeliverymanFactory {
+export class AdminFactory {
   constructor(private prisma: PrismaService) {}
 
-  async makePrismaDeliveryman(
-    data: Partial<DeliverymanProps> = {},
-  ): Promise<Deliveryman> {
+  async makePrismaAdmin(data: Partial<AdminProps> = {}): Promise<Admin> {
     const maxAttempts = 5
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const cpf = data.cpf ?? uniqueCpf()
-      const deliveryman = makeDeliveryman({ ...data, cpf })
+      const admin = makeAdmin({ ...data, cpf })
       try {
         await this.prisma.user.create({
-          data: PrismaUserMapper.toPrisma(deliveryman, 'DELIVERYMAN'),
+          data: PrismaUserMapper.toPrisma(admin, 'ADMIN'),
         })
-        return deliveryman
+        return admin
       } catch (e: unknown) {
         if (attempt === maxAttempts - 1 || data.cpf) throw e
       }
     }
-    throw new Error('makePrismaDeliveryman: unexpected')
+    throw new Error('makePrismaAdmin: unexpected')
   }
 }

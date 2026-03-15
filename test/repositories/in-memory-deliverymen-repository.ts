@@ -5,8 +5,8 @@ import { Deliveryman } from '@/domain/delivery/enterprise/deliveryman'
 export class InMemoryDeliverymenRepository implements DeliverymenRepository {
   public items: Deliveryman[] = []
 
-  async findMany({ page }: PaginationParams) {
-    const deliverymen = this.items.slice((page - 1) * 20, page * 20)
+  async findMany({ page, perPage }: PaginationParams) {
+    const deliverymen = this.items.slice((page - 1) * perPage, page * perPage)
 
     return deliverymen
   }

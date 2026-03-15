@@ -5,8 +5,8 @@ import { Recipient } from '@/domain/delivery/enterprise/recipient'
 export class InMemoryRecipientRepository implements RecipientsRepository {
   public items: Recipient[] = []
 
-  async findMany({ page }: PaginationParams) {
-    const recipients = this.items.slice((page - 1) * 20, page * 20)
+  async findMany({ page, perPage }: PaginationParams) {
+    const recipients = this.items.slice((page - 1) * perPage, page * perPage)
 
     return recipients
   }
