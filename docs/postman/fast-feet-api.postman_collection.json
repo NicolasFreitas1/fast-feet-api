@@ -1,0 +1,83 @@
+{
+  "info": {
+    "name": "FastFeet API",
+    "_postman_id": "ab6dbf7b-43c9-4a6f-a6d2-3ad1e4f1ec01",
+    "description": "Collection for the main FastFeet API flows.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3333" },
+    { "key": "adminToken", "value": "" },
+    { "key": "deliverymanToken", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "recipientId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth - Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpf\": \"11111111111\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "Auth - Login Deliveryman",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpf\": \"22222222222\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "Orders - Mark Waiting",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/orders/{{orderId}}/waiting"
+      }
+    },
+    {
+      "name": "Orders - Pick Up",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{deliverymanToken}}" }],
+        "url": "{{baseUrl}}/orders/{{orderId}}/pick-up"
+      }
+    },
+    {
+      "name": "Orders - Deliver With File",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{deliverymanToken}}" }],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/orders/{{orderId}}/deliver"
+      }
+    },
+    {
+      "name": "Orders - Return",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{deliverymanToken}}" }],
+        "url": "{{baseUrl}}/orders/{{orderId}}/return"
+      }
+    }
+  ]
+}

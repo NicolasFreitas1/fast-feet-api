@@ -1,73 +1,124 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# FastFeet API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+FastFeet API is a REST service for a fictional courier company. It covers authentication, recipient and deliveryman management, order lifecycle control, nearby delivery search, recipient notifications, cache integration, and delivery proof upload.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The project was built to be portfolio-ready: business rules are explicit, RBAC is enforced, tests cover the main flows, and the local setup is short enough to demo live.
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js 20+
+- NestJS 10
+- TypeScript 5
+- Prisma 7 with PostgreSQL
+- Vitest + Supertest
+- Redis
+- AWS SDK S3 client for R2/S3-compatible uploads
 
-## Installation
+## Architecture
 
-```bash
-$ pnpm install
-```
+The codebase follows a Clean Architecture split:
 
-## Running the app
+- `src/domain`: entities, value objects, use cases, domain events, contracts
+- `src/infra`: HTTP layer, auth, Prisma repositories, cache, storage, env, notification integration
+- `src/core`: shared abstractions such as `Either`, entities and domain event plumbing
 
-```bash
-# development
-$ pnpm run start
+Business rules stay in the application/domain layer. Controllers translate HTTP input/output and delegate to use cases.
 
-# watch mode
-$ pnpm run start:dev
+## Main business rules
 
-# production mode
-$ pnpm run start:prod
-```
+- Only admins can manage deliverymen, recipients and orders.
+- Only admins can move an order back to `waiting`.
+- Only deliverymen can pick up, deliver and return orders.
+- Only the assigned deliveryman can deliver or return a picked up order.
+- Delivery confirmation requires a multipart image upload.
+- Deliverymen can only list their own deliveries.
+- Recipient notifications are fired on order status changes.
 
-## Test
+## Local setup
+
+1. Copy the environment file.
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+cp .env.example .env
+cp .env.test.example .env.test
 ```
 
-## Support
+2. Fill the JWT keys in `.env` and `.env.test`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+3. Start local services and seed demo data.
 
-## Stay in touch
+```bash
+pnpm install
+pnpm run bootstrap:local
+pnpm run start:dev
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The API runs at `http://localhost:3333`.
 
-## License
+## Demo credentials
 
-Nest is [MIT licensed](LICENSE).
+- Admin: `11111111111 / 123456`
+- Deliveryman: `22222222222 / 123456`
+
+## API docs
+
+- Human-friendly docs: `http://localhost:3333/docs`
+- OpenAPI contract: `http://localhost:3333/docs/openapi.json`
+- Postman collection: [docs/postman/fast-feet-api.postman_collection.json](/c:/Development/fast-feet-api/docs/postman/fast-feet-api.postman_collection.json)
+
+## Core flows
+
+### Authenticate
+
+```http
+POST /auth/login
+Content-Type: application/json
+
+{
+  "cpf": "11111111111",
+  "password": "123456"
+}
+```
+
+### Deliver with file upload
+
+```bash
+curl -X PATCH http://localhost:3333/orders/:id/deliver \
+  -H "Authorization: Bearer <token>" \
+  -F "file=@proof.jpg"
+```
+
+### Return an order
+
+```http
+PATCH /orders/:id/return
+Authorization: Bearer <deliveryman-token>
+```
+
+## Scripts
+
+- `pnpm run start:dev`: run the API in watch mode
+- `pnpm run test`: run unit tests
+- `pnpm run test:e2e`: run E2E tests with direct SQL schema setup
+- `pnpm run test:cov`: generate coverage
+- `pnpm run db:seed:demo`: seed demo users and sample orders
+- `pnpm run bootstrap:local`: start Docker services, apply migrations and seed demo data
+
+## Testing
+
+- Unit tests cover the application layer and key negative cases.
+- E2E tests cover authentication, RBAC, transitions, multipart delivery proof upload and deterministic database reset.
+- Coverage reports are generated with `pnpm run test:cov`.
+
+## Production-minded defaults
+
+- Configurable CORS allowlist
+- Global security headers middleware
+- In-memory rate limiting for API protection
+- Local storage driver by default, R2-compatible upload support when `STORAGE_DRIVER=r2`
+
+## Known trade-offs
+
+- Rate limiting is in-memory, which is enough for demo and small deployments but should move to Redis for horizontal scale.
+- The project serves a static OpenAPI contract instead of generating Swagger dynamically because the current workspace does not include Swagger packages.
+- Local upload storage is the default for easier demos; use R2/S3-compatible storage in hosted environments.

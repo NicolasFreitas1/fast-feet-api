@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FastFeet API Docs</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f1e8;
+        --surface: #fffdf8;
+        --ink: #1f2a30;
+        --accent: #0f766e;
+        --muted: #6b7280;
+        --border: #d8d2c4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #fff7e6, var(--bg));
+        color: var(--ink);
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 48px 24px 64px;
+      }
+
+      h1,
+      h2 {
+        margin: 0 0 12px;
+      }
+
+      p,
+      li {
+        line-height: 1.6;
+      }
+
+      .hero,
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 12px 40px rgba(31, 42, 48, 0.08);
+      }
+
+      .hero {
+        margin-bottom: 24px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      code,
+      pre {
+        font-family: Consolas, monospace;
+      }
+
+      pre {
+        overflow: auto;
+        padding: 16px;
+        border-radius: 12px;
+        background: #132226;
+        color: #effcf7;
+      }
+
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>FastFeet API</h1>
+        <p>
+          OpenAPI docs for the courier management API. The canonical contract is
+          available in <a href="/docs/openapi.json">/docs/openapi.json</a>.
+        </p>
+        <p>
+          Main demo credentials after running the seed:
+          <code>11111111111 / 123456</code> (admin) and
+          <code>22222222222 / 123456</code> (deliveryman).
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Key flows</h2>
+          <ul>
+            <li>Admin login and entity management</li>
+            <li>Order marked as waiting by admin</li>
+            <li>Pickup, delivery with multipart proof, and return by deliveryman</li>
+            <li>Nearby orders and my deliveries for deliverymen</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>Important routes</h2>
+          <ul>
+            <li><code>POST /auth/login</code></li>
+            <li><code>PATCH /orders/:id/waiting</code></li>
+            <li><code>PATCH /orders/:id/pick-up</code></li>
+            <li><code>PATCH /orders/:id/deliver</code></li>
+            <li><code>PATCH /orders/:id/return</code></li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="card" style="margin-top: 24px;">
+        <h2>Multipart delivery example</h2>
+        <pre>PASSWORD=123456
+TOKEN=&lt;deliveryman JWT&gt;
+curl -X PATCH http://localhost:3333/orders/:id/deliver \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@proof.jpg"</pre>
+      </section>
+    </main>
+  </body>
+</html>
