@@ -3,9 +3,10 @@ import { APP_GUARD } from '@nestjs/core'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { EnvService } from '../env/env.service'
+import { EnvModule } from '../env/env.module'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { JwtStrategy } from './jwt.strategy'
-import { EnvModule } from '../env/env.module'
+import { IsAdminGuard } from './is-admin.guard'
 
 @Module({
   imports: [
@@ -28,10 +29,12 @@ import { EnvModule } from '../env/env.module'
   providers: [
     JwtStrategy,
     EnvService,
+    IsAdminGuard,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
   ],
+  exports: [IsAdminGuard],
 })
 export class AuthModule {}
