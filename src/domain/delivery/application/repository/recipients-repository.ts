@@ -1,4 +1,4 @@
-import { PaginationParams } from 'src/core/repositories/pagination-params'
+import { PaginationParams } from '@/core/repositories/pagination-params'
 import { Recipient } from '../../enterprise/recipient'
 
 export abstract class RecipientsRepository {

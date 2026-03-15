@@ -1,4 +1,4 @@
-import { Either, left, right } from 'src/core/either'
+import { Either, left, right } from '@/core/either'
 import { DeliverymanAlreadyExistsError } from './errors/deliveryman-already-exists-error'
 import { Deliveryman } from '../../enterprise/deliveryman'
 import { Injectable } from '@nestjs/common'

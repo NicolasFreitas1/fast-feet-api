@@ -1,4 +1,4 @@
-import { PaginationParams } from 'src/core/repositories/pagination-params'
+import { PaginationParams } from '@/core/repositories/pagination-params'
 import { Deliveryman } from '../../enterprise/deliveryman'
 
 export abstract class DeliverymenRepository {

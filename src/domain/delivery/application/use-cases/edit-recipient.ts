@@ -1,5 +1,5 @@
 import { Either, left, right } from '@/core/either'
-import { ResourceNotFoundError } from '../../../../core/errors/errors/resource-not-found-error'
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
 
 import { RecipientsRepository } from '../repository/recipients-repository'
 
@@ -8,9 +8,9 @@ import { Recipient } from '../../enterprise/recipient'
 
 interface EditRecipientUseCaseRequest {
   recipientId: string
-  address: string
-  name: string
-  phone: string
+  address?: string
+  name?: string
+  phone?: string
 }
 
 type EditRecipientUseCaseResponse = Either<
@@ -36,9 +36,9 @@ export class EditRecipientUseCase {
       return left(new ResourceNotFoundError())
     }
 
-    recipient.address = address
-    recipient.name = name
-    recipient.phone = phone
+    if (name !== undefined) recipient.name = name
+    if (address !== undefined) recipient.address = address
+    if (phone !== undefined) recipient.phone = phone
 
     await this.recipientsRepository.save(recipient)
 
