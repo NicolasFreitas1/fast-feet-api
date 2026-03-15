@@ -77,4 +77,43 @@ describe('Authenticate (E2E)', () => {
 
     expect(response.statusCode).toBe(401)
   })
+
+  test('[POST] /auth/login - returns 429 when rate limit is exceeded', async () => {
+    const limitedModuleRef = await createE2eTestingModule(
+      [AdminFactory, DeliverymanFactory],
+      {
+        RATE_LIMIT_MAX_REQUESTS: 2,
+        RATE_LIMIT_WINDOW_MS: 60000,
+      },
+    )
+
+    const limitedApp = limitedModuleRef.createNestApplication()
+    await limitedApp.init()
+
+    try {
+      const httpServer = limitedApp.getHttpServer()
+
+      await request(httpServer).post('/auth/login').send({
+        cpf: '00000000000',
+        password: 'wrong',
+      })
+
+      await request(httpServer).post('/auth/login').send({
+        cpf: '00000000000',
+        password: 'wrong',
+      })
+
+      const response = await request(httpServer).post('/auth/login').send({
+        cpf: '00000000000',
+        password: 'wrong',
+      })
+
+      expect(response.statusCode).toBe(429)
+      expect(response.body.message).toBe(
+        'Too many requests, please try again later',
+      )
+    } finally {
+      await limitedApp.close()
+    }
+  })
 })

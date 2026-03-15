@@ -32,7 +32,10 @@ async function createE2ePrismaService(): Promise<PrismaService> {
  * "record not found" ao rodar a suíte inteira.
  * Usa um único PrismaClient (useValue) para garantir que factories e app usem o mesmo banco.
  */
-export async function createE2eTestingModule(providers: Provider[] = []) {
+export async function createE2eTestingModule(
+  providers: Provider[] = [],
+  envOverrides: Partial<Env> = {},
+) {
   process.env.DATABASE_URL = getDatabaseURL()
   const prismaService = await createE2ePrismaService()
   return Test.createTestingModule({
@@ -41,7 +44,7 @@ export async function createE2eTestingModule(providers: Provider[] = []) {
   })
     .overrideProvider(EnvService)
     .useValue({
-      get: (key: keyof Env) => e2eEnv[key],
+      get: (key: keyof Env) => envOverrides[key] ?? e2eEnv[key],
     })
     .overrideProvider(PrismaService)
     .useValue(prismaService)
