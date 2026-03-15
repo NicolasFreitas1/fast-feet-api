@@ -18,7 +18,8 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["./src/*"],
-      "generated/*": ["./generated/*"]
+      "generated/*": ["./generated/*"],
+      "test/*": ["./test/*"]
     },
     "types": ["vitest/globals", "multer"]
   }
