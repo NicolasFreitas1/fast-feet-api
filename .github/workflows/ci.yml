@@ -8,6 +8,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://docker:docker@localhost:5432/fast-feet-api?schema=public
 
     services:
       postgres:
@@ -43,11 +45,11 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
       - run: pnpm run lint
       - run: pnpm run test
       - run: pnpm run test:e2e
         env:
-          DATABASE_URL: postgresql://docker:docker@localhost:5432/fast-feet-api?schema=public
           STORAGE_DRIVER: local
           STORAGE_LOCAL_BASE_URL: http://localhost:3000/uploads
           APP_BASE_URL: http://localhost:3000
