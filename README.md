@@ -1,5 +1,7 @@
 # FastFeet API
 
+[![CI](https://github.com/NicolasFreitas1/fast-feet-api/actions/workflows/ci.yml/badge.svg)](https://github.com/NicolasFreitas1/fast-feet-api/actions/workflows/ci.yml)
+
 FastFeet API is a delivery management backend built to showcase backend engineering fundamentals with production-minded decisions. It handles authentication, role-based access control, order lifecycle transitions, nearby deliveries, delivery proof upload, recipient notifications, cache integration, and automated test coverage.
 
 This repository is meant to work well as a portfolio project:
@@ -9,6 +11,17 @@ This repository is meant to work well as a portfolio project:
 - Unit and end-to-end tests covering the core flows
 - Swagger documentation and demo seed for fast evaluation
 - Local-first setup with room to evolve toward production
+
+## Project goals
+
+This project was designed to demonstrate backend engineering practices such as:
+
+- Clean Architecture with clear layer boundaries
+- Domain-driven modeling around orders, recipients, and deliverymen
+- RBAC enforcement across admin and delivery workflows
+- Deterministic unit and end-to-end testing
+- Infrastructure abstraction for storage, notifications, and persistence
+- Production-minded trade-off awareness without sacrificing local developer experience
 
 ## Why this project stands out
 
@@ -37,6 +50,8 @@ FastFeet is not just a CRUD API. It models a real workflow with state transition
 
 The project follows a Clean Architecture style to keep business rules independent from frameworks and infrastructure details.
 
+### Layered flow
+
 ```text
 HTTP Controller
     -> Use Case
@@ -48,6 +63,30 @@ Domain Events
 
 Storage Contract
     -> Local Storage or R2/S3-compatible uploader
+```
+
+### Visual architecture
+
+```text
+                Client
+                  |
+                  v
+         HTTP Controllers (NestJS)
+                  |
+                  v
+       Use Cases (Application Layer)
+          /                       \
+         v                         v
+Repository Contracts          Domain Events
+         |                         |
+         v                         v
+ Prisma Repositories      Notification Service
+         |
+         v
+    PostgreSQL
+
+ Redis supports cache integration
+ and production-oriented evolution.
 ```
 
 ### Layers
@@ -64,6 +103,49 @@ Storage Contract
 - Zod validates input boundaries while Swagger documents the HTTP contract
 - Storage is abstracted so delivery proof upload can stay local in development and move to R2 in hosted environments
 - Notification sending is modeled as a contract and triggered through domain events
+
+## Domain model
+
+### Core actors and entities
+
+```text
+User
+|- Admin
+`- Deliveryman
+
+Order
+|- Recipient
+|- Deliveryman
+`- Status
+```
+
+### Order lifecycle
+
+```text
+waiting
+  |
+  v
+picked_up
+  | \
+  |  \
+  v   v
+delivered returned
+```
+
+### Authorization model
+
+| Action | Admin | Deliveryman |
+| --- | --- | --- |
+| Authenticate | Yes | Yes |
+| Manage deliverymen | Yes | No |
+| Manage recipients | Yes | No |
+| Manage orders | Yes | No |
+| Change user password | Yes | No |
+| Pick up order | No | Yes |
+| Deliver order with proof | No | Yes |
+| Return order | No | Yes |
+| List own deliveries | No | Yes |
+| List nearby deliveries | No | Yes |
 
 ## Quick evaluation
 
@@ -142,7 +224,21 @@ It also creates demo recipients and example orders in different states.
 
 - Swagger UI: `http://localhost:3333/docs`
 - OpenAPI JSON: `http://localhost:3333/docs/openapi.json`
-- Postman collection:[Postman collection](docs/postman/fast-feet-api.postman_collection.json)
+- Postman collection: [fast-feet-api.postman_collection.json](docs/postman/fast-feet-api.postman_collection.json)
+
+## Swagger preview
+
+The interactive Swagger UI is the fastest way to inspect the contract, test authorization, and validate the main workflows during a live review.
+
+Recommended repository asset:
+
+- `docs/images/swagger-ui.png`
+
+After adding the screenshot, render it here:
+
+```md
+![Swagger UI](docs/images/swagger-ui.png)
+```
 
 ## Main workflows
 
@@ -317,24 +413,24 @@ There is also CI automation in [ci.yml](/c:/Development/fast-feet-api/.github/wo
 
 ```text
 src
-├─ core
-├─ domain
-│  └─ delivery
-│     ├─ application
-│     └─ enterprise
-└─ infra
-   ├─ auth
-   ├─ cache
-   ├─ database
-   ├─ http
-   ├─ notification
-   └─ storage
+|- core
+|- domain
+|  `- delivery
+|     |- application
+|     `- enterprise
+`- infra
+   |- auth
+   |- cache
+   |- database
+   |- http
+   |- notification
+   `- storage
 
 test
-├─ factories
-├─ repositories
-├─ storage
-└─ utils
+|- factories
+|- repositories
+|- storage
+`- utils
 ```
 
 ## Production-minded defaults
