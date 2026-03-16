@@ -48,6 +48,12 @@ jobs:
       - run: pnpm exec prisma generate
       - run: pnpm run lint
       - run: pnpm run test
+      - name: Generate test JWT keys
+        run: |
+          private_key=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 | base64 -w 0)
+          public_key=$(printf '%s' "$private_key" | base64 -d | openssl rsa -pubout 2>/dev/null | base64 -w 0)
+          echo "JWT_PRIVATE_KEY=$private_key" >> "$GITHUB_ENV"
+          echo "JWT_PUBLIC_KEY=$public_key" >> "$GITHUB_ENV"
       - run: pnpm run test:e2e
         env:
           STORAGE_DRIVER: local
