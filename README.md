@@ -225,6 +225,7 @@ It also creates demo recipients and example orders in different states.
 - Swagger UI: `http://localhost:3333/docs`
 - OpenAPI JSON: `http://localhost:3333/docs/openapi.json`
 - Postman collection: [fast-feet-api.postman_collection.json](docs/postman/fast-feet-api.postman_collection.json)
+- Engineering case study: [docs/engineering-decisions.md](docs/engineering-decisions.md)
 
 ## Swagger preview
 
